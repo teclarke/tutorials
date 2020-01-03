@@ -130,7 +130,6 @@ def gameplay(number_of_rounds=5):
   Co-ordinates scoring and dice-rolling.
   Tracks user scores and number of rounds played.
   """
-  """
   scoreboard()
   authorised_u1, authorised_u2 = (False,)*2
   while not authorised_u1:
@@ -145,8 +144,7 @@ def gameplay(number_of_rounds=5):
   print("\n### Users", user_1, "and", user_2, "are playing. ###")
 
   users = [[user_1,0],[user_2,0]] # co-ordinates  with the list below
-  """
-  users = [["jim789",0],["geoff012",0]]
+
   # Repeats for the number of rounds required
   for rounds in range(number_of_rounds):
     print("\n################################")
@@ -162,6 +160,15 @@ def gameplay(number_of_rounds=5):
       if users[i][1] < 0: users[i][1] = 0
       print(f"## That makes your score {users[i][1]}! ##")
   print("\n################################")
+  # checking if tiebreak
+  while users[0][1] == users[1][1]:
+      print("\n## Tiebreak! You each get one more spin of the dice. Good luck! ##")
+      for i in range(2):
+          print(f"## {users[i][0]}, your time has come. ##")
+          users[i][1] += calculate_score(dice(6),0)
+          if users[i][1] < 0 : users[i][1] = 0
+      print("\n################################")
+
   print("## End of Game ##")
   print("The final scores are:")
   print(users[0][0], users[0][1], "-", users[1][1], users[1][0])
@@ -171,6 +178,7 @@ def gameplay(number_of_rounds=5):
           winner_name = scores[0]
 
   print(f"## The winner of the game is {winner_name} with {winner_score} points! ##")
+  confirm = input("Press enter to save results >>")
   save_results(winner_name,winner_score)
   scoreboard()
 
@@ -178,7 +186,7 @@ def gameplay(number_of_rounds=5):
 playing = True
 while playing:
   print("\n\n\n### Welcome to OCR Dice Game! ###")
-  gameplay(1)
+  gameplay()
   print("\n################################")
   print("# Type anything to end gameplay.")
   again = input("# Press enter to play again. >>")
