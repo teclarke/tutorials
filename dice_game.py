@@ -27,7 +27,7 @@ def authorise_user(user_number, filename="users.txt"):
       else:
           print(f"\n## User {username} is not authorised. ##")
           print(f"## Add user {username} to user directory? ##")
-          print("(type anything for yes)",end="")
+          print("(type anything for yes)")
           adduser = input("(press enter) No >>")
           if adduser != "":
               with open(filename, "a") as a:
@@ -38,7 +38,7 @@ def authorise_user(user_number, filename="users.txt"):
   except FileNotFoundError:
         print("## No authorised users found. ##")
         print(f"## Create user list with user {username} anyway? ##")
-        print("(type anything to cancel game)",end="")
+        print("(type anything to cancel game)")
         createnew = input("(press enter) Yes >>")
         if createnew == "":
             with open(filename,"w+") as u:
@@ -103,14 +103,10 @@ def scoreboard(results_filename="results.txt"):
                   user_curr_score = dictionary_of_users[users_score_list[0]]
               else:
                   user_curr_score = 0
-              print(user_curr_score)
               dictionary_of_users.update({users_score_list[0]:max([int(users_score_list[1]),user_curr_score])})
-              print(dictionary_of_users)
           # sort the dictionary by score
           dictionary_of_scores = {value: key for key, value in dictionary_of_users.items()}
-          print(dictionary_of_scores)
           list_of_scores = list(dictionary_of_scores.items())
-          print(dictionary_of_scores)
           dictionary_of_scores = dict(sorted(list_of_scores,reverse=True))
     except FileNotFoundError:
       scoreboard = open("results.txt","w+")
@@ -119,7 +115,7 @@ def scoreboard(results_filename="results.txt"):
     if dictionary_of_scores == {}:
         print("## The scoreboard is empty. Be the first player to win! ##")
     else:
-        print("## The winners' board now stands as... ##\n")
+        print("## The scoreboard currently stands as... ##\n")
         displayed = 0
         while displayed < 5 and displayed < len(dictionary_of_scores):
             for score, user in dictionary_of_scores.items():
@@ -133,6 +129,7 @@ def gameplay(number_of_rounds=5):
   Co-ordinates scoring and dice-rolling.
   Tracks user scores and number of rounds played.
   """
+  scoreboard()
   authorised_u1, authorised_u2 = (False,)*2
   while not authorised_u1:
     # Checks if user 1 is authorised using authorise_user()
@@ -176,6 +173,11 @@ def gameplay(number_of_rounds=5):
   scoreboard()
 
 ### Run code ###
-print("### Welcome to OCR Dice Game! ###")
-scoreboard()
-gameplay()
+playing = True
+while playing:
+  print("\n\n\n### Welcome to OCR Dice Game! ###")
+  gameplay(1)
+  print("\n################################")
+  print("# Type anything to end gameplay.")
+  again = input("# Press enter to play again. >>")
+  playing = True if again == "" else False
