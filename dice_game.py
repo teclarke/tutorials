@@ -53,9 +53,10 @@ def dice(sides):
   wait = input(">> Press enter to roll dice. <<")
   print(">> Dice rolling... <<")
   number = random.randint(1,sides)
+  print(f"You rolled a {number}!")
   return number
 
-def calculate_score(roll_number, roll_score, prev_roll=0, current_round_score=0):
+def calculate_score(roll_1,roll_2,current_round_score=0,roll_3=0): # roll_number, roll_score, prev_roll=0, current_round_score=0
   """
   Calculates the total score for a particular round.
   If this is the user's first dice roll, roll_number=1.
@@ -63,21 +64,21 @@ def calculate_score(roll_number, roll_score, prev_roll=0, current_round_score=0)
   The score, roll_score from the dice roll is added to the total.
   Score is altered depending on scoring rules.
   """
-  # Add roll_score to user total
-  # current_round_score is used for double rolls
-  round_score = current_round_score + roll_score
-  print(f"## You rolled a {roll_score}! ##")
-  # Scoring rules
-  if roll_score % 2 == 0:
-    round_score += 10
-  else:
-    round_score -= 5
-  # Check for double roll on second round
-  if roll_number == 2 and roll_score == prev_roll:
-    print("## You rolled a double! Roll again. ##")
-    roll_3 = calculate_score(3,dice(6), 0, round_score)
-  else:
-    return round_score
+  for roll_score in [roll_1, roll_2,roll_3]:
+      # Add roll_score to user total
+      # current_round_score is used for double rolls
+      current_round_score += roll_score
+      # Scoring rules
+      if roll_score != 0:
+          if roll_score % 2 == 0:
+            current_round_score += 10
+          else:
+            current_round_score -= 5
+      # Check for double roll on second round
+  if roll_1 == roll_2 and roll_1 != 0 and roll_2 != 0:
+        print("## You rolled a double! Roll again. ##")
+        current_round_score = calculate_score(0,0,current_round_score,dice(6))
+  return current_round_score
 
 def save_results(winner, winner_score):
   print("\n################################")
@@ -129,6 +130,7 @@ def gameplay(number_of_rounds=5):
   Co-ordinates scoring and dice-rolling.
   Tracks user scores and number of rounds played.
   """
+  """
   scoreboard()
   authorised_u1, authorised_u2 = (False,)*2
   while not authorised_u1:
@@ -143,22 +145,22 @@ def gameplay(number_of_rounds=5):
   print("\n### Users", user_1, "and", user_2, "are playing. ###")
 
   users = [[user_1,0],[user_2,0]] # co-ordinates  with the list below
+  """
+  users = [["jim789",0],["geoff012",0]]
   # Repeats for the number of rounds required
   for rounds in range(number_of_rounds):
     print("\n################################")
     print("## Welcome to round", str(rounds+1) +"! ##")
     # Displays scores so far
     print("The current scores are:")
-    print(user_1, users[0][1], "-", users[1][1], user_2)
+    print(users[0][0], users[0][1], "-", users[1][1], users[1][0])
     # Repeats gameplay process for each user
     for i in range(2):
-      print()
-      print("## It's", users[i][0] + "'s turn! ##")
+      print("\n## It's", users[i][0] + "'s turn! ##")
       # Rolls dice and calculates score
-      for roll in range(2):
-        users[i][1] += calculate_score(roll,dice(6))
-        if users[i][1] < 0: users[i][1] = 0
-        print(f"## That makes your score {users[i][1]}! ##")
+      users[i][1] += calculate_score(dice(6),dice(6))
+      if users[i][1] < 0: users[i][1] = 0
+      print(f"## That makes your score {users[i][1]}! ##")
   print("\n################################")
   print("## End of Game ##")
   print("The final scores are:")
