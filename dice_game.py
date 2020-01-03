@@ -1,17 +1,49 @@
-def authorise_user(username):
-  """
-  Checks if a user is authorised in a csv file.
-  Returns True if yes, False if no.
-  """
-  return True # for testing
-
+from time import sleep
 def ask_for_user(user_number):
   """
   Asks the user to enter a username to play the game.
   """
-  print(f"### Please enter an authorised username for user {user_number}. ###")
+  print(f"\n### Please enter an authorised username for user {user_number}. ###")
   user = input("Username: >")
   return user
+
+def authorise_user(user_number, filename="users.txt"):
+  """
+  Asks for user from ask_for_user.
+  Checks if a user is authorised in a txt file.
+  Returns True if yes, False if no.
+  """
+  username = ask_for_user(user_number)
+  try:
+      with open(filename,"r") as u:
+          for line in u:
+              if username.strip("\n ") == line.strip("\n ") and username != "":
+                  print("## You're in! ##")
+                  return True,username
+              else:
+                  continue
+      if username == "":
+          return False, username
+      else:
+          print(f"\n## User {username} is not authorised. ##")
+          print(f"## Add user {username} to user directory? ##")
+          print("(type anything for yes)",end="")
+          adduser = input("(press enter) No >>")
+          if adduser != "":
+              with open(filename, "a") as a:
+                  a.write("\n"+username)
+                  return True,username
+          else:
+              return False,username
+  except FileNotFoundError:
+        print("## No authorised users found. ##")
+        print(f"## Create user list with user {username} anyway? ##")
+        print("(type anything to cancel game)",end="")
+        createnew = input("(press enter) Yes >>")
+        if createnew == "":
+            with open(filename,"w+") as u:
+                u.write(username)
+                return True
 
 def dice(sides):
   """
@@ -59,80 +91,91 @@ def scoreboard(results_filename="results.txt"):
     """
     Displays the top 5 scores from the results.txt file.
     """
-    # open results file
-    with open(results_filename, "r") as r:
-        dictionary_of_users = {}
-        for line in r:
-            # each user's score is on a different line, so split into name: score.
-            users_score_list = line.strip("\n ").split(",")
-            # put the users' names and scores into a dictionary
-            dictionary_of_users.update({users_score_list[0]:int(users_score_list[1])})
-        # sort the dictionary by score
-        dictionary_of_scores = {value: key for key, value in dictionary_of_users.items()}
-        list_of_scores = list(dictionary_of_scores.items())
-        dictionary_of_scores = dict(sorted(list_of_scores,reverse=True))
-
+    try:
+      # open results file
+      with open(results_filename, "r") as r:
+          dictionary_of_users = {}
+          for line in r:
+              # each user's score is on a different line, so split into name: score.
+              users_score_list = line.strip("\n ").split(",")
+              # put the users' names and scores into a dictionary
+              if users_score_list[0] in dictionary_of_users.keys():
+                  user_curr_score = dictionary_of_users[users_score_list[0]]
+              else:
+                  user_curr_score = 0
+              print(user_curr_score)
+              dictionary_of_users.update({users_score_list[0]:max([int(users_score_list[1]),user_curr_score])})
+              print(dictionary_of_users)
+          # sort the dictionary by score
+          dictionary_of_scores = {value: key for key, value in dictionary_of_users.items()}
+          print(dictionary_of_scores)
+          list_of_scores = list(dictionary_of_scores.items())
+          print(dictionary_of_scores)
+          dictionary_of_scores = dict(sorted(list_of_scores,reverse=True))
+    except FileNotFoundError:
+      scoreboard = open("results.txt","w+")
+      dictionary_of_scores = {}
     # displaying the top 5 results to the user
     if dictionary_of_scores == {}:
         print("## The scoreboard is empty. Be the first player to win! ##")
     else:
-        print("## The scoreboard now stands as... ##\n")
+        print("## The winners' board now stands as... ##\n")
         displayed = 0
         while displayed < 5 and displayed < len(dictionary_of_scores):
             for score, user in dictionary_of_scores.items():
                 print(str(displayed+1)+".","##", user, "with", score, "points. ##")
                 displayed += 1
+    sleep(2)
 
-
-def gameplay(user_1, user_2,number_of_rounds=5):
+def gameplay(number_of_rounds=5):
   """
-  Runs only once authorise_user() is True.
+  Runs only once authorise_user() is True for both players.
   Co-ordinates scoring and dice-rolling.
   Tracks user scores and number of rounds played.
   """
-  """authorised_u1, authorised_u2 = (False,)*2
-  while not authorised_u1 and not authorised_u2:
-    # Checks if users 1 and 2 are authorised using authorise_user()
-    authorised_u1, authorised_u2 = authorise_user(user_1), authorise_user(user_2)
-    # Asks the user for another username if wrong.
-    if not authorised_u1:
-      print(">> User 1 not authorised. <<")
-      user_1 = ask_for_user("1")
-    if not authorised_u2:
-      print(">> User 2 not authorised. <<")
-      user_2 = ask_for_user("2")
-    """
+  authorised_u1, authorised_u2 = (False,)*2
+  while not authorised_u1:
+    # Checks if user 1 is authorised using authorise_user()
+    authorised_u1,user_1 = authorise_user("1")
+  while not authorised_u2:
+    # as above for user 2
+    authorised_u2,user_2 = authorise_user("2")
+
+
   # Once all users are authorised, gameplay starts.
   print("\n### Users", user_1, "and", user_2, "are playing. ###")
-  users = [user_1,user_2]
+
+  users = [[user_1,0],[user_2,0]] # co-ordinates  with the list below
   # Repeats for the number of rounds required
-  scores = [0,0]
   for rounds in range(number_of_rounds):
     print("\n################################")
     print("## Welcome to round", str(rounds+1) +"! ##")
     # Displays scores so far
     print("The current scores are:")
-    print(user_1, scores[0], "-", scores[1], user_2)
+    print(user_1, users[0][1], "-", users[1][1], user_2)
     # Repeats gameplay process for each user
     for i in range(2):
       print()
-      print("## It's", users[i] + "'s turn! ##")
+      print("## It's", users[i][0] + "'s turn! ##")
       # Rolls dice and calculates score
       for roll in range(2):
-        scores[i] += calculate_score(roll,dice(6))
-        if scores[i] < 0: scores[i] = 0
-        print(f"## That makes your score {scores[i]}! ##")
+        users[i][1] += calculate_score(roll,dice(6))
+        if users[i][1] < 0: users[i][1] = 0
+        print(f"## That makes your score {users[i][1]}! ##")
   print("\n################################")
   print("## End of Game ##")
   print("The final scores are:")
-  print(user_1, scores[0], "-", scores[1], user_2)
-  winner = users[scores.index(max(scores))]
-  print(f"## The winner of the game is {winner} with {max(scores)} points! ##")
-  save_results(winner,max(scores))
+  print(users[0][0], users[0][1], "-", users[1][1], users[1][0])
+  winner_score= max([users[0][1],users[1][1]])
+  for scores in users:
+      if winner_score in scores:
+          winner_name = scores[0]
+
+  print(f"## The winner of the game is {winner_name} with {winner_score} points! ##")
+  save_results(winner_name,winner_score)
   scoreboard()
 
 ### Run code ###
 print("### Welcome to OCR Dice Game! ###")
 scoreboard()
-#gameplay(ask_for_user("1"), ask_for_user("2"))
-gameplay("Tom","Bob",1)
+gameplay()
